@@ -21,7 +21,8 @@ const foodSchema = new mongoose.Schema({
         match: /\.(jpeg|jpg|png|gif|webp)$/
     },
     foodCategoryId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'FoodCategory',
         required: true,
     }
 },
