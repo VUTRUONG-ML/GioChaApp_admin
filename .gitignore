@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 .vscode/
 *.env
-
+.gitignore
 #  BACKEND (Express + MongoDB)
 backend/node_modules/
 backend/.env
@@ -20,3 +20,5 @@ admin/node_modules/
 admin/.env
 admin/build/
 admin/.DS_Store
+
+

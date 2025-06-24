@@ -15,5 +15,16 @@ const verifyToken = (req, res, next) => {
         return res.status(403).json({ message: 'Token không hợp lệ!' });
     }
 };
+const verifyAdmin = (req, res, next) => {
+    // Giả sử khi decode JWT, bạn gắn role vào req.user
+    if (req.user?.isAdmin) {
+        next();
+    } else {
+        return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+};
 
-module.exports = verifyToken;
+module.exports = {
+    verifyToken,
+    verifyAdmin
+};
