@@ -64,15 +64,66 @@ exports.login = async(req, res) => {
     }
 };
 
-exports.getUser = async (req, res) => {
+// /api/auth
+exports.getUsers = async (req, res) => {
     try{
-        const user = await User.findById(req.user.id).select('-passWord');
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+        const users = await User.find();
+        if (!users) {
+            return res.status(404).json({ message: "User empty" });
         }
 
-        res.json({user});
+        res.status(200).json({
+            message:"fectch users successful!",
+            users
+        });
     } catch (error) {
         res.status(500).json({ message: "Server error: ", error: error.message });
     }
+};
+
+// /api/auth/update/:idUser
+exports.updateUser = async(req, res) => {
+    const idUser = req.params.id;
+    const { name, email, role} = req.body;
+    if(!name || !email){
+        res.status(400).json({
+            message: "Fields are required!"
+        });
+    }
+    try{
+        const updatedUser = await User.findByIdAndUpdate(idUser , {
+            userName: name,
+            email: email,
+            isAdmin: role
+        }, {new: true});
+
+        if(!updatedUser){
+            res.status(404).json({message: "User not found!"});
+        }
+        
+        res.status(200).json({
+            message: "Update user successfull",
+            user: updatedUser
+        });
+    } catch(error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+// /api/auth/delete/:idUser
+exports.deleteUser = async(req, res) => {
+    const idUser = req.params.id;
+    try{
+        const deletedUser = await User.findByIdAndDelete(idUser);
+        if(!deletedUser){
+            res.status(404).json({message: "User not found!"});
+        }
+
+        res.status(200).json({
+            message: "Deleted user successfull!",
+            user: deletedUser
+        })
+    } catch(error) {
+        res.status(500).json({message: "Server error", error: error.message});
+    };
 };
