@@ -65,4 +65,31 @@
   - DELETE /api/cart/removeFromCart/:foodId (user)
   - DELETE /api/cart/clearCart (user)
 
-👉 **Kết quả**: Backend đã mở rộng thêm các chức năng đặt hàng và giỏ hàng, phân quyền rõ ràng giữa admin và người dùng, sẵn sàng tích hợp với frontend.
+---
+
+## 📆 Ngày 03/07/2025
+
+- Viết API `GET /api/auth` để lấy danh sách tất cả user (chỉ dành cho admin).
+
+- Viết tính năng tìm kiếm user (search user) ở frontend.
+
+- Hoàn thiện giao diện đăng nhập và đăng xuất cho Admin bằng Chakra UI.
+
+- Tạo và sử dụng `AuthContext` để:
+
+  - Quản lý trạng thái đăng nhập (`isAuthenticated`, `user`, `token`)
+  - Lưu và đồng bộ thông tin đăng nhập qua `localStorage`
+  - Tự động gửi token trong header khi gọi các API bảo vệ (Authorization: Bearer ...)
+  - Tự logout khi token hết hạn hoặc không hợp lệ.
+
+- Sử dụng middleware `verifyToken` và `verifyAdmin` ở backend để bảo vệ route `/api/auth`.
+
+- Kiểm tra trạng thái `loading`, `isAuthenticated` trước khi hiển thị nội dung (đã xử lý trong `App.js` và `PrivateRoute`).
+
+- Cài đặt `PrivateRoute` để bảo vệ các route admin, ngăn người dùng không có quyền truy cập.
+
+- Tự động chuyển hướng về `/login` nếu người dùng chưa đăng nhập hoặc không hợp lệ.
+
+- Hiển thị cảnh báo khi đăng xuất hoặc khi token hết hạn.
+
+👉 **Kết quả**: Đã hoàn chỉnh luồng xác thực và phân quyền cho admin. Frontend có thể hiển thị nội dung tùy theo quyền người dùng. Hệ thống an toàn và sẵn sàng phát triển tính năng tiếp theo.

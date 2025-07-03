@@ -1,5 +1,15 @@
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
+
 // Header.jsx
 export default function Header() {
+    const {logout} = useContext(AuthContext);
+    const handleLogout = () => {
+        const confirmLogout = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
+        if (confirmLogout) {
+          logout();
+        }
+    };
     return (
         <div style={{
             height: 60,
@@ -23,7 +33,7 @@ export default function Header() {
                         borderRadius: 4,
                         cursor: 'pointer',
                     }}
-                    onClick={() => alert('Đăng xuất chưa xử lý')}
+                    onClick={handleLogout}
                 >
                 Đăng xuất
                 </button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -9,26 +9,59 @@ import {
   Heading,
   useToast
 } from "@chakra-ui/react";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const toast = useToast();
+  const {login} = useContext(AuthContext);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (email === 'admin@gmail.com' && password === '123456') {
-      localStorage.setItem('isAdminLoggedIn', 'true');
-      navigate('/admin/dashboard');
-    } else {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, passWord: password }) 
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        login(data.user, data.token);
+  
+        if (data.user.isAdmin) {
+          navigate("/admin/dashboard");
+        } else {
+          toast({
+            title: "Bạn không phải Admin",
+            status: "error",
+            duration: 3000,
+            isClosable: true
+          });
+        }
+      } else {
+        toast({
+          title: "Đăng nhập thất bại",
+          description: "Vui lòng kiểm tra lại email và mật khẩu",
+          status: "error",
+          duration: 3000,
+          isClosable: true
+        });
+      }
+    } catch (err) {
+      console.error("Lỗi kết nối:", err);
       toast({
-        title: 'Đăng nhập thất bại',
-        description: 'Email hoặc mật khẩu không đúng.',
-        status: 'error',
+        title: "Lỗi máy chủ",
+        description: "Không thể kết nối tới server.",
+        status: "error",
         duration: 3000,
-        isClosable: true,
+        isClosable: true
       });
     }
   };

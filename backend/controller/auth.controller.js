@@ -67,6 +67,7 @@ exports.login = async(req, res) => {
 // /api/auth
 exports.getUsers = async (req, res) => {
     try{
+        console.log("FE vừa gọi API /api/auth");
         const users = await User.find();
         if (!users) {
             return res.status(404).json({ message: "User empty" });
@@ -76,6 +77,20 @@ exports.getUsers = async (req, res) => {
             message:"fectch users successful!",
             users
         });
+    } catch (error) {
+        res.status(500).json({ message: "Server error: ", error: error.message });
+    }
+};
+
+// /api/auth/me
+exports.getMe = async (req, res) => {
+    const idUser = req.user.id;
+    try{
+        const me = await User.findById(idUser).select("-password");
+        if(!me){
+            res.status(404).json({message: "User not found!"});
+        }
+        res.status(200).json(me);
     } catch (error) {
         res.status(500).json({ message: "Server error: ", error: error.message });
     }
