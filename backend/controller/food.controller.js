@@ -1,4 +1,6 @@
+const { default: mongoose } = require('mongoose');
 const Food = require('../models/Food');
+const FoodCategory = require('../models/FoodCategory');
 
 // GET /api/foods
 exports.getFoods = async (req, res) => {
@@ -44,7 +46,7 @@ exports.createFood = async (req, res) => {
             foodDescription: description,
             foodPrice: price,
             foodImage: imageUrl,
-            foodCategoryId: categoryId
+            foodCategoryId: new mongoose.Types.ObjectId(categoryId)
         });
         const saveFood = await newFood.save();
         res.status(201).json({
@@ -103,3 +105,54 @@ exports.deleteFood = async (req, res) => {
     }
 };
 
+// GET /api/food/getFoodByCategory/:categoryId
+exports.getFoodsByCategory = async (req, res) => {
+    const categoryId = req.params.categoryId;
+    try {
+        const category = await FoodCategory.findById(categoryId);
+        if(!category){
+            return res.status(404).json({message: "Không tồn tại danh mục"});
+        }
+
+        const foods = await Food.find({foodCategoryId: categoryId});
+        res.status(200).json({
+            message: 'Danh mục ' + category.categoryName,
+            foods
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+// GET /api/food/search?name=banh
+exports.searchFoodsByName = async (req, res) => {
+    const searchQuery = req.query.name;
+  
+    if (!searchQuery) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+    
+    function escapeRegex(text) {
+        return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    }
+    const safeSearch = escapeRegex(searchQuery);
+
+    try {
+      const foods = await Food.find({
+        foodName: { $regex: safeSearch, $options: 'i' } // i = ignoreCase -> ko phân biệt hoa thường
+      });
+  
+      if (foods.length === 0) {
+        return res.status(404).json({ message: "No foods found" });
+      }
+  
+      res.status(200).json({
+        message: `Found ${foods.length} food(s) matching "${searchQuery}"`,
+        foods
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+  

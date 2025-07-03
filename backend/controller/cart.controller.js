@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Cart = require('../models/Cart');
 const Food = require('../models/Food');
 const User = require('../models/User');
@@ -19,7 +20,11 @@ exports.addToCart = async (req, res) => {
     const { foodId, quantity } = req.body;
     if (!foodId || !quantity) {
         return res.status(400).json({ message: "Food ID and quantity are required" });
+    }   
+    if (!mongoose.isValidObjectId(foodId)) {
+        return res.status(400).json({ message: "Invalid food ID" });
     }
+      
     try{
         const userId = req.user.id;
         let cart = await Cart.findOne({ userId });
