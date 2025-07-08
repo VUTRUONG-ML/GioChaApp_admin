@@ -92,4 +92,13 @@
 
 - Hiển thị cảnh báo khi đăng xuất hoặc khi token hết hạn.
 
+---
+
+## 📆 Ngày 04/07/2025
+
+- Sửa lại AuthContext
+- Hiểu được:
+  - Mình kiểm tra đăng nhập (isAuthenticated) ở trang chính (App.js) rồi còn phải kiểm tra ở các route như /admin/users bằng "PrivateRoute" để khi mà người dùng copy link và truy cập trực tiếp vào link nào thì mình cũng đã kiểm tra cho phép vào hay không
+  - AuthContext lưu lại token -> gọi Api /api/auth/me để kiểm tra token đó có còn được sử dụng ko và trả về user của Token đó cho các trang khác sử dụng
+
 👉 **Kết quả**: Đã hoàn chỉnh luồng xác thực và phân quyền cho admin. Frontend có thể hiển thị nội dung tùy theo quyền người dùng. Hệ thống an toàn và sẵn sàng phát triển tính năng tiếp theo.

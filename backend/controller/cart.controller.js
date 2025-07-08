@@ -8,7 +8,13 @@ exports.getCart = async (req, res) => {
     try{
         const userId = req.user.id; // Lấy ID người dùng từ token
         const cart = await Cart.findOne({ userId}).populate('items.food');
-        if(!cart) return res.status(404).json({ message: "Cart not found" });
+        if (!cart) {
+            return res.status(200).json({
+                _id: null,
+                userId,
+                items: []
+            });
+        }
         res.status(200).json(cart);
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });

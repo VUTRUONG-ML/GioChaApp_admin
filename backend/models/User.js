@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    phoneNumber: {
+        type: String,
+        match: /^[0-9]{10,11}$/
+    },
     isAdmin:{
         type: Boolean,
         default: false,

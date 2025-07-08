@@ -10,9 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
-
-    if (!savedToken || !savedUser) {
+    if (!savedToken) {
       setLoading(false);
       return;
     }
@@ -25,9 +23,9 @@ export const AuthProvider = ({ children }) => {
     })
         .then((res) => res.json())
         .then((data) => {
-          if (data.users || data.user) {
+          if (data || data._id) {
             setToken(savedToken);
-            setUser(JSON.parse(savedUser));
+            setUser(data);
             setIsAuthenticated(true);
           } else {
             logout();

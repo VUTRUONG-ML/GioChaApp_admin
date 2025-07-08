@@ -2,66 +2,148 @@ import { useState, useEffect, useContext } from 'react';
 import { FaUserEdit } from "react-icons/fa";
 import { TiUserDelete } from "react-icons/ti";
 import { AuthContext } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Heading,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  IconButton,
+  useToast,
+  Text,
+  Flex
+} from '@chakra-ui/react';
 
 export default function UserList() {
-    const [users, setUsers] = useState([]);
-    const {token} = useContext(AuthContext);
-    useEffect(() => {
-        fetch("http://localhost:5000/api/auth",{
-            method: "GET",
-            headers:{
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if(data.users){
-                    const formattedUsers = data.users.map((u, index) => ({
-                        id: index + 1,
-                        name: u.userName,
-                        email: u.email,
-                        role: u.isAdmin ? "admin" : "user"
-                    }));
-                    setUsers(formattedUsers);
-                } else{
-                    console.warn("Không tồn tại dữ liệu users!");
-                }
-            })
-            .catch((err) => {
-                console.error("Lỗi:", err);
-            });
-    }, []);
-    return (
-        <div>
-            <h1>Danh sách người dùng</h1>
-            <table border="1" cellPadding={10} style={{ marginTop: 16, width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr style={{background: '#f0f0f0'}}>
-                        <th style={{ border: '1px solid black', padding: '10px' }}>ID</th>
-                        <th style={{ border: '1px solid black', padding: '10px' }}>Tên</th>
-                        <th style={{ border: '1px solid black', padding: '10px' }}>Email</th>
-                        <th style={{ border: '1px solid black', padding: '10px' }}>Vai trò</th>
-                        <th style={{ border: '1px solid black', padding: '10px' }}>Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map((u) => (
-                        <tr key={u.id}>
-                            <td style={{ border: '1px solid black', padding: '10px' }}>{u.id}</td>
-                            <td style={{ border: '1px solid black', padding: '10px' }}>{u.name}</td>
-                            <td style={{ border: '1px solid black', padding: '10px' }}>{u.email}</td>
-                            <td style={{ border: '1px solid black', padding: '10px' }}>{u.role}</td>
-                            <td style={{ border: '1px solid black', padding: '10px' }}>
-                                <div style={{display: 'flex',justifyContent:"space-between"}}>
-                                    <button ><FaUserEdit size={20} color="blue" /></button>
-                                    <button ><TiUserDelete size={20} color="black"/></button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
+  const [users, setUsers] = useState([]);
+  const { token } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/auth", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          toast({
+            title: "Lỗi khi tải người dùng",
+            description: data.message || "Lỗi server",
+            status: "error",
+            duration: 3000,
+            isClosable: true
+          });
+          return;
+        }
+        const data = await res.json();
+
+        if (data.users) {
+          const formattedUsers = data.users.map((u, index) => ({
+            id: index + 1,
+            _id: u._id,
+            name: u.userName,
+            email: u.email,
+            role: u.isAdmin ? "admin" : "user"
+          }));
+          setUsers(formattedUsers);
+        } else {
+          toast({
+            title: "Không có dữ liệu người dùng",
+            status: "info",
+            duration: 3000,
+            isClosable: true
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Lỗi:", err);
+      });
+  }, []);
+
+  const handleDeleteUser = async (userId) => {
+    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa người dùng này?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/auth/delete/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast({
+          title: "Xóa người dùng thành công!",
+          status: "success",
+          duration: 3000,
+          isClosable: true
+        });
+        setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa người dùng:", error);
+      alert("Đã xảy ra lỗi khi xóa.");
+    }
+  }
+
+  return (
+    <Box maxW="1000px" mx="auto" mt={5} p={4}>
+      {users.length === 0 ? (
+        <Text fontSize="xl" fontWeight="bold" textAlign="center">Không có người dùng nào khác để hiển thị.</Text>
+      ) : (
+        <>
+          <Heading size="lg" mb={4}>Danh sách người dùng</Heading>
+          <Table variant="striped" colorScheme="gray" size="md">
+            <Thead bg="gray.100">
+              <Tr>
+                <Th>ID</Th>
+                <Th>Tên</Th>
+                <Th>Email</Th>
+                <Th>Vai trò</Th>
+                <Th>Hành động</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {users.map((u) => (
+                <Tr key={u.id}>
+                  <Td>{u.id}</Td>
+                  <Td>{u.name}</Td>
+                  <Td>{u.email}</Td>
+                  <Td textTransform="capitalize">{u.role}</Td>
+                  <Td>
+                    <Flex gap={2}>
+                      <IconButton
+                        icon={<FaUserEdit />}
+                        colorScheme="blue"
+                        aria-label="Sửa"
+                        onClick={() => navigate(`/admin/users/update/${u._id}`)}
+                      />
+                      <IconButton
+                        icon={<TiUserDelete />}
+                        colorScheme="red"
+                        aria-label="Xóa"
+                        onClick={() => handleDeleteUser(u._id)}
+                      />
+                    </Flex>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </>
+      )}
+    </Box>
+  );
 }
-  

@@ -34,8 +34,7 @@ exports.getFoodsById = async (req, res) => {
 
 // POST /api/foods/create
 exports.createFood = async (req, res) => {
-    const { name, description, price, imageUrl, categoryId } = req.body; 
-    const food = await Food.findOne({ foodName: name });
+    const { name, description, price, imageUrl, categoryId, ingredients, discount, rating  } = req.body; 
     // Kiểm tra các trường bắt buộc
     if (!name || !description || !price || !imageUrl || !categoryId) {
         return res.status(400).json({ message: "All fields are required" });
@@ -46,7 +45,10 @@ exports.createFood = async (req, res) => {
             foodDescription: description,
             foodPrice: price,
             foodImage: imageUrl,
-            foodCategoryId: new mongoose.Types.ObjectId(categoryId)
+            foodCategoryId: new mongoose.Types.ObjectId(categoryId),
+            ingredients: ingredients || [],
+            discount: discount || 0,
+            rating: rating || 0 
         });
         const saveFood = await newFood.save();
         res.status(201).json({
@@ -64,18 +66,24 @@ exports.createFood = async (req, res) => {
 // PUT /api/foods/update/:id
 exports.updateFood = async (req, res) => {
     const foodId = req.params.id;
-    const { name, description, price, imageUrl, categoryId } = req.body;
-    if (!name || !description || !price || !imageUrl || !categoryId) {
+    const { name, description, price, imageUrl, categoryId, ingredients } = req.body;
+    if (!name || !description || !price || !imageUrl || !categoryId ) {
         return res.status(400).json({ message: "All fields are required" });
     }
+
+    const updatedFields = {
+        foodName: name,
+        foodDescription: description,
+        foodPrice: price,
+        foodImage: imageUrl,
+        foodCategoryId: categoryId
+    };
+
+    if (ingredients !== undefined) {
+        updatedFields.ingredients = ingredients;
+    }
     try {
-        const updatedFood = await Food.findByIdAndUpdate(foodId,{
-            foodName: name,
-            foodDescription: description,
-            foodPrice: price,
-            foodImage: imageUrl,
-            foodCategoryId: categoryId
-        }, { new: true });  // Trả về document sau khi cập nhật 
+        const updatedFood = await Food.findByIdAndUpdate(foodId, updatedFields, { new: true });  // Trả về document sau khi cập nhật 
         if (!updatedFood) {
             return res.status(404).json({ message: "Food item not found" });
         }

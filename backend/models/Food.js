@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const foodSchema = new mongoose.Schema({
-    foodName:{
+    foodName: {
         type: String,
         required: true,
         unique: true
@@ -23,13 +23,30 @@ const foodSchema = new mongoose.Schema({
     foodCategoryId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'FoodCategory',
-        required: true,
-    }
-},
-    {
-        timestamps: true 
-    }
-);
+        required: true
+    },
 
+    // ✅ Thêm mới các trường dưới đây:
+
+    discount: {
+        type: Number,
+        default: 0,        // 0 = không giảm giá
+        min: 0,
+        max: 100
+    },
+    rating: {
+        type: Number,
+        default: 4.5,      // hoặc bạn cho ngẫu nhiên 4.3–4.8 tùy ý
+        min: 0,
+        max: 5
+    },
+    ingredients: {
+        type: [String],    // danh sách thành phần
+        default: []
+    }
+
+}, {
+    timestamps: true
+});
 
 module.exports = mongoose.model('Food', foodSchema);

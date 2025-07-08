@@ -4,12 +4,14 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
     try{
-        const { userName, email, passWord } = req.body;
+        const { userName, email, phoneNumber, passWord } = req.body;
 
         // Check user already exists
-        const exitUser = await User.find({userName: userName});
-        if (exitUser.length > 0) {
-            return res.status(400).json({ message: "User already exists" });
+        const exitUser = await User.findOne({
+            $or: [{ userName }, { email }]
+        });
+        if (exitUser) {
+            return res.status(400).json({ message: "Tên người dùng hoặc email đã tồn tại." });
         }
 
         // Hash password
@@ -18,6 +20,7 @@ exports.register = async (req, res) => {
         const user = new User({
             userName: userName,
             email: email,
+            phoneNumber: phoneNumber,
             passWord: hashedPassword,
         });
 
@@ -35,12 +38,12 @@ exports.login = async(req, res) => {
 
         const user = await User.findOne({email: email});
         if (!user) {
-            return res.status(400).json({ message: "User not found" });
+            return res.status(400).json({ message: "Tài khoản sử dụng email không tồn tại" });
         }
 
         const isMatch = await bcrypt.compare(passWord, user.passWord);
         if(!isMatch){
-            return res.status(400).json({ error: 'Invalid password' });
+            return res.status(400).json({ message: 'Sai mật khẩu' });
         }
 
         // Generate JWT token
@@ -67,15 +70,33 @@ exports.login = async(req, res) => {
 // /api/auth
 exports.getUsers = async (req, res) => {
     try{
-        console.log("FE vừa gọi API /api/auth");
-        const users = await User.find();
-        if (!users) {
+        const currentUserId = req.user.id;
+        const users = await User.find({_id: {$ne: currentUserId}}); // $ne: not equal -> lấy danh sách users ngoại trừ user hiện tại đang đăng nhập
+        if (users.length === 0) {
             return res.status(404).json({ message: "User empty" });
         }
 
         res.status(200).json({
             message:"fectch users successful!",
             users
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server error: ", error: error.message });
+    }
+};
+
+// /api/auth/:id
+exports.getUserById = async (req, res) => {
+    const idUser = req.params.id;
+    try{
+        const user = await User.findById(idUser);
+        if (!user) {
+            return res.status(404).json({ message: "User empty" });
+        }
+
+        res.status(200).json({
+            message:"fectch user successful!",
+            user
         });
     } catch (error) {
         res.status(500).json({ message: "Server error: ", error: error.message });
@@ -96,10 +117,10 @@ exports.getMe = async (req, res) => {
     }
 };
 
-// /api/auth/update/:idUser
+// /api/auth/update/:id
 exports.updateUser = async(req, res) => {
     const idUser = req.params.id;
-    const { name, email, role} = req.body;
+    const { name, email, phoneNumber, role} = req.body;
     if(!name || !email){
         res.status(400).json({
             message: "Fields are required!"
@@ -109,6 +130,7 @@ exports.updateUser = async(req, res) => {
         const updatedUser = await User.findByIdAndUpdate(idUser , {
             userName: name,
             email: email,
+            phoneNumber: phoneNumber,
             isAdmin: role
         }, {new: true});
 
