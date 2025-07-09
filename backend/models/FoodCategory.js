@@ -10,7 +10,7 @@ const foodCategorySchema = new mongoose.Schema({
         required: true
     },
 },{
-    timestamps: true // ✅ thêm dòng này
+    timestamps: true
 });
 
 module.exports = mongoose.model('FoodCategory', foodCategorySchema);

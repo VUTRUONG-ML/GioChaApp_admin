@@ -25,7 +25,7 @@ exports.register = async (req, res) => {
         });
 
         await user.save();
-        res.status(201).json({ message: "User registered successfully" });
+        res.status(201).json({ message: "Đăng ký tài khoản thành công" });
     }
     catch (error) {
         res.status(500).json({ message: "Server error ", error: error.message });
@@ -54,7 +54,7 @@ exports.login = async(req, res) => {
         );
 
         res.status(200).json({
-            message: "Login successful",
+            message: "Đăng nhập thành công",
             token: token,
             user:{
                 id: user._id,
@@ -63,7 +63,7 @@ exports.login = async(req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: "Login Fail" });
+        res.status(500).json({ message: "Đăng nhập thất bại" });
     }
 };
 
@@ -109,7 +109,7 @@ exports.getMe = async (req, res) => {
     try{
         const me = await User.findById(idUser).select("-password");
         if(!me){
-            res.status(404).json({message: "User not found!"});
+            res.status(404).json({message: "Tài khoản người dùng không tồn tại!"});
         }
         res.status(200).json(me);
     } catch (error) {
@@ -123,7 +123,7 @@ exports.updateUser = async(req, res) => {
     const { name, email, phoneNumber, role} = req.body;
     if(!name || !email){
         res.status(400).json({
-            message: "Fields are required!"
+            message: "Vui lòng nhập đầy đủ thông tin!"
         });
     }
     try{

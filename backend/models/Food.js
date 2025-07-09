@@ -26,7 +26,6 @@ const foodSchema = new mongoose.Schema({
         required: true
     },
 
-    // ✅ Thêm mới các trường dưới đây:
 
     discount: {
         type: Number,
